@@ -1,0 +1,20 @@
+# Compiled binaries
+*.exe
+*.out
+*.o
+*.a
+
+# Large dataset files (upload to OneDrive instead)
+data/dataset_10000.csv
+data/dataset_100000.csv
+data/dataset_1000000.csv
+data/dataset_*.csv
+!data/dataset_1000.csv
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# IDE folders
+.vscode/
+.idea/
