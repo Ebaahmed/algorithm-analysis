@@ -1,0 +1,3 @@
+Best case time: 1.080000e-08 seconds
+Average case time: 1.970000e-08 seconds
+Worst case time: 1.650000e-08 seconds
