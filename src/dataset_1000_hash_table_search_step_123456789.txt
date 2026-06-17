@@ -1,0 +1,5 @@
+Searching for target: 123456789
+Hash index = 123456789 % 1009 = 594
+Step 1: compare with 7335857401/konyq -> target < key, go LEFT
+Step 2: reached empty subtree (nullptr) -> not found
+-1 != 123456789

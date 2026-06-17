@@ -1,0 +1,6 @@
+Searching for target: 8138274075
+Hash index = 8138274075 % 1009 = 937
+Step 1: compare with 4981622620/acizj -> target > key, go RIGHT
+Step 2: compare with 7017797737/kdxdc -> target > key, go RIGHT
+Step 3: compare with 8138274075/cmdkc -> match
+8138274075 = 8138274075/cmdkc
