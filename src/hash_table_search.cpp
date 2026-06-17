@@ -12,8 +12,8 @@
 // Task Distribution
 // Member_1: Radix Sort
 // Member_2: Radix Sort Step + Heap Sort
-// Member_3: Hash Table Search + Hash Table Search Step
-// Member_4: Heap Sort Step + Conclusion
+// Member_3: Hash Table Search + Heap Sort Step
+// Member_4: Hash Table Search Step + Conclusion
 // *********************************************************
 //
 // Hash table with SEPARATE CHAINING, where each bucket is an
