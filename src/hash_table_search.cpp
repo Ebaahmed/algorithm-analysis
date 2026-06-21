@@ -1,18 +1,19 @@
 // *********************************************************
-// Program: hash_table_search.cpp
+// Program: dataset_generator.cpp
 // Course: CCP6214 Algorithm Design and Analysis
 // Lecture Class: TC6L
 // Tutorial Class: T22L
 // Trimester: 2610
-// Member_1: 242UC243BE | EBA MOHAMED ABBAS AHMED    | +60136734355
-// Member_2: 242UC244SN | MOHAMMAD IEMAN BIN ZAHARI  | +60183756140
-// Member_3: 242UC244L3 | HAREIN A/L SATHIAMURTHY    | +60143653986
-// Member_4: 242UC243B4 | LAMA M. R. SIAM            | +60183942734
+// Member_1: 242UC243BE | EBA MOHAMED ABBAS AHMED  |eba.mohamed.abbas@student.mmu.edu.my| +60136734355
+// Member_2: 242UC244SN | MOHAMMAD IEMAN BIN ZAHARI |MOHAMMAD.IEMAN.ZAHARI@student.mmu.edu.my| +60183756140
+// Member_3: 242UC244L3 | HAREIN A/L SATHIAMURTHY  |HAREIN.SATHIAMURTHY@student.mmu.edu.my| +60143653986
+// Member_4: 242UC243B4 | LAMA M. R. SIAM     |LAMA.M.R@student.mmu.edu.my| +60183942734
+
 // *********************************************************
 // Task Distribution
-// Member_1: Dataset Generator + Radix Sort
-// Member_2: Radix Sort Step + Heap Sort
-// Member_3: Hash Table Search + Heap Sort Step
+// Member_1: Dataset Generator — generates n unique random (integer, string) records
+// Member_2: Radix Sort Step
+// Member_3: Hash Table Search
 // Member_4: Hash Table Search Step + Conclusion
 // *********************************************************
 
