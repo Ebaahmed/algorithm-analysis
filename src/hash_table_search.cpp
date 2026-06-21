@@ -15,19 +15,6 @@
 // Member_3: Hash Table Search + Heap Sort Step
 // Member_4: Hash Table Search Step + Conclusion
 // *********************************************************
-//
-// Hash table with SEPARATE CHAINING, where each bucket is an
-// AVL (height-balanced) binary search tree keyed on the integer.
-// This guarantees O(log b) work per bucket of size b, so even an
-// adversarial / heavily-collided bucket degrades to O(log n)
-// instead of O(n) (the linked-list chaining worst case).
-//
-// Time complexity (search):
-//   Best    : O(1)            target is the root of its bucket's AVL tree
-//   Average : O(1) expected   load factor kept near 1 (table_size ~ n, prime)
-//   Worst   : O(log n)        all keys hash to one bucket -> one AVL of n nodes
-// Space complexity: O(n) for the n stored records + O(n) tree node overhead.
-// *********************************************************
 
 #include <iostream>
 #include <fstream>
@@ -104,13 +91,9 @@ static AVLNode* avlInsert(AVLNode* node, long long key, const string& value) {
     updateHeight(node);
     int bf = balanceFactor(node);
 
-    // Left Left
     if (bf > 1 && key < node->left->key)  return rotateRight(node);
-    // Right Right
     if (bf < -1 && key > node->right->key) return rotateLeft(node);
-    // Left Right
     if (bf > 1 && key > node->left->key)  { node->left = rotateLeft(node->left); return rotateRight(node); }
-    // Right Left
     if (bf < -1 && key < node->right->key) { node->right = rotateRight(node->right); return rotateLeft(node); }
 
     return node;
@@ -259,12 +242,7 @@ static void runAndTime(const string& csv_filename) {
     for (const auto& r : data)
         table.insert(r.integer_val, r.str_val);
 
-    // ---- Classify every key by its AVL search depth ----
-    // Best  : keys sitting at the root of their bucket (depth 1).
-    // Worst : keys at the maximum depth found in the table.
-    // We collect a POOL of keys for the best and worst cases (not a
-    // single key) so that repeatedly searching one fixed key cannot
-    // sit hot in cache and flatten the depth-1 vs depth-max difference.
+   
     int min_depth = INT_MAX, max_depth = 0;
     for (const auto& r : data) {
         int d = table.searchDepth(r.integer_val);
@@ -328,14 +306,9 @@ static void runAndTime(const string& csv_filename) {
     }
 }
 
-// -------------------------------------------------------
-// Main
-// -------------------------------------------------------
+
 int main() {
-    // ==============================================================
-    // INPUT CONFIGURATION (dataset filenames; >=10 sizes available).
-    // Comment/uncomment as needed.
-    // ==============================================================
+   
     vector<string> datasets = {
         "dataset_1000.csv",
         "dataset_5000.csv",

@@ -15,21 +15,6 @@
 // Member_3: Hash Table Search
 // Member_4: Hash Table Search Step + Conclusion
 // *********************************************************
-//
-// Algorithm: LSD (Least Significant Digit) Radix Sort
-//   - Sorts records by their 10-digit integer key only
-//   - Processes digits from rightmost (d=10) to leftmost (d=1)
-//   - Uses counting sort as a stable subroutine at each digit pass
-//   - Time Complexity:  O(d * n)  where d = 10 fixed digits → effectively O(n)
-//   - Space Complexity: O(n + k)  where k = 10 (base-10 buckets)
-//   - Stable sort: equal keys preserve original relative order
-//
-// Usage:
-//   g++ radix_sort.cpp -o radix_sort -std=c++11
-//   ./radix_sort dataset_1000.csv
-//   ./radix_sort dataset_1000.csv dataset_10000.csv dataset_100000.csv
-// *********************************************************
-
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -38,13 +23,11 @@
 #include <chrono>
 using namespace std;
 
-// ── Data record ──────────────────────────────────────────────
 struct Record {
     long long key;   // 10-digit integer (sort key)
     string    label; // 5-letter lowercase string
 };
 
-// ── Read CSV into vector of Record ───────────────────────────
 bool readCSV(const string& filename, vector<Record>& data) {
     ifstream in(filename);
     if (!in.is_open()) {
@@ -68,8 +51,7 @@ bool readCSV(const string& filename, vector<Record>& data) {
     return true;
 }
 
-// ── One pass of counting sort on digit position `exp` ────────
-// exp = 1 → units digit, 10 → tens, 100 → hundreds, ...
+
 void countingSortByDigit(vector<Record>& arr, long long exp) {
     int n = (int)arr.size();
     vector<Record> output(n);
@@ -108,7 +90,6 @@ void radixSort(vector<Record>& arr) {
     }
 }
 
-// ── Process one dataset file ──────────────────────────────────
 void processFile(const string& inputFile) {
     // ── 1. Read input (I/O excluded from timing) ──────────────
     vector<Record> data;
@@ -117,17 +98,13 @@ void processFile(const string& inputFile) {
     long long n = (long long)data.size();
     cout << "\n[" << inputFile << "]  " << n << " records loaded." << endl;
 
-    // ── 2. Sort — START TIMER ─────────────────────────────────
     auto startTime = chrono::high_resolution_clock::now();
     radixSort(data);
     auto endTime   = chrono::high_resolution_clock::now();
-    // ── 3. Sort — STOP TIMER ──────────────────────────────────
 
     double elapsed = chrono::duration<double>(endTime - startTime).count();
 
-    // ── 4. Build output filename ──────────────────────────────
-    // Input:  dataset_1000.csv
-    // Output: radix_sorted_dataset_1000.csv
+    
     string outFilename = "radix_sorted_" + inputFile;
     // If input has a directory prefix, strip it
     size_t slash = outFilename.rfind('/');
@@ -140,7 +117,6 @@ void processFile(const string& inputFile) {
         return;
     }
 
-    // Write sorted records: integer/string  (slash separator as per assignment sample)
     for (const Record& r : data) {
         out << r.key << "/" << r.label << "\n";
     }
@@ -154,7 +130,6 @@ void processFile(const string& inputFile) {
     cout << "Output saved : " << outBase << endl;
 }
 
-// ── Main ──────────────────────────────────────────────────────
 int main(int argc, char* argv[]) {
     if (argc < 2) {
         cout << "Usage: " << argv[0] << " <dataset1.csv> [dataset2.csv ...]" << endl;

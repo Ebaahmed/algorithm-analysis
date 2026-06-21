@@ -26,17 +26,13 @@
 using namespace std;
 using namespace chrono;
 
-// -------------------------------------------------------
-// Data record
-// -------------------------------------------------------
+
 struct Record {
     long long integer_val;
     string    str_val;
 };
 
-// -------------------------------------------------------
-// Read all rows from a CSV file
-// -------------------------------------------------------
+
 vector<Record> readCSV(const string& filename) {
     vector<Record> data;
     ifstream fin(filename);
@@ -63,11 +59,7 @@ vector<Record> readCSV(const string& filename) {
     return data;
 }
 
-// -------------------------------------------------------
-// Heapify (max-heap) — sifts element at index i DOWN.
-// heap_size is the current active heap boundary.
-// Sorting is done by integer_val.
-// -------------------------------------------------------
+
 void heapify(vector<Record>& arr, int heap_size, int i) {
     while (true) {
         int largest = i;
@@ -84,14 +76,7 @@ void heapify(vector<Record>& arr, int heap_size, int i) {
     }
 }
 
-// -------------------------------------------------------
-// Heap Sort using max-heap
-//   Phase 1 — Build max-heap: call heapify from n/2-1 down to 0
-//   Phase 2 — Extract max repeatedly: swap root with last,
-//              shrink heap, heapify root
-// Time complexity  : O(n log n)  — all cases
-// Space complexity : O(1)        — in-place
-// -------------------------------------------------------
+
 void heapSort(vector<Record>& arr) {
     int n = (int)arr.size();
 
@@ -132,9 +117,7 @@ void writeSortedCSV(const string& filename, const vector<Record>& arr) {
     fout.close();
 }
 
-// -------------------------------------------------------
-// Run heap sort on one dataset file, measure time, output
-// -------------------------------------------------------
+
 void runAndTime(const string& csv_filename) {
     cout << "\n--- Processing: " << csv_filename << " ---" << endl;
 
@@ -186,9 +169,7 @@ void runAndTime(const string& csv_filename) {
     cout << "  Time log      : " << out_txt << endl;
 }
 
-// -------------------------------------------------------
-// Main
-// -------------------------------------------------------
+
 int main() {
     // ==============================================================
     // INPUT CONFIGURATION  (comment/uncomment as needed)

@@ -33,11 +33,7 @@ struct Record {
     string    str_val;
 };
 
-// -------------------------------------------------------
-// Read only the rows in the inclusive range [start_row, end_row]
-// from a dataset CSV file. Rows are 1-indexed to match the spec
-// (start row / end row are row numbers in the csv file).
-// -------------------------------------------------------
+
 vector<Record> readCSVRange(const string& filename, int start_row, int end_row) {
     vector<Record> data;
     ifstream fin(filename);
@@ -71,11 +67,7 @@ vector<Record> readCSVRange(const string& filename, int start_row, int end_row) 
     return data;
 }
 
-// -------------------------------------------------------
-// Heapify (max-heap) — sift element at index i DOWN within the
-// active heap boundary heap_size. Comparison is on integer_val.
-// (Mirrors Member 2's heap_sort.cpp heapify exactly.)
-// -------------------------------------------------------
+
 void heapify(vector<Record>& arr, int heap_size, int i) {
     while (true) {
         int largest = i;
@@ -106,14 +98,7 @@ string snapshot(const vector<Record>& arr, const string& label) {
     return oss.str();
 }
 
-// -------------------------------------------------------
-// Heap Sort with step recording.
-//   Phase 1 — Build max-heap (heapify from n/2-1 down to 0).
-//             Record the built heap state as "initial".
-//   Phase 2 — Repeatedly swap root with last, shrink, heapify;
-//             record state after each extraction as "i = k".
-// The recorded lines are written to the output file.
-// -------------------------------------------------------
+
 void heapSortSteps(vector<Record>& arr, vector<string>& steps) {
     int n = (int)arr.size();
     if (n == 0) return;
@@ -133,9 +118,7 @@ void heapSortSteps(vector<Record>& arr, vector<string>& steps) {
     }
 }
 
-// -------------------------------------------------------
-// Extract size token (e.g. "1000") from "dataset_1000.csv"
-// -------------------------------------------------------
+
 string extractSizeToken(const string& csv_filename) {
     string base = csv_filename;
     size_t slash = base.find_last_of("/\\");
@@ -148,16 +131,9 @@ string extractSizeToken(const string& csv_filename) {
     return base;
 }
 
-// -------------------------------------------------------
-// Main
-// -------------------------------------------------------
+
 int main() {
-    // ==============================================================
-    // INPUT CONFIGURATION (comment/uncomment; one active line)
-    //   *dataset_n.csv
-    //   *start row (row number in csv file, 1-indexed)
-    //   *end row
-    // ==============================================================
+    
 
     // string input_file = "dataset_1000.csv"; int start_row = 100; int end_row = 110;
     string input_file = "dataset_1000.csv";  int start_row = 1;   int end_row = 7;

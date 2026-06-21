@@ -15,23 +15,6 @@
 // Member_3: Hash Table Search + Heap Sort Step
 // Member_4: Hash Table Search Step + Conclusion
 // *********************************************************
-//
-// This program traces a SINGLE search through the hash table and
-// writes the full search path to a file. It reuses the same
-// structure as hash_table_search.cpp: SEPARATE CHAINING where each
-// bucket is an AVL (height-balanced) binary search tree keyed on the
-// 10-digit integer.
-//
-// For a given target the program prints, step by step:
-//   1. the hash index (which bucket the target maps to)
-//   2. every node it compares along the AVL tree path, and the
-//      decision taken (go left / go right / match)
-//   3. the final result line, exactly in the assignment's format:
-//        found     ->  <target> = <target>/<string>
-//        not found ->  -1 != <target>
-//
-// Output file: dataset_<n>_hash_table_search_step_<target>.txt
-// *********************************************************
 
 #include <iostream>
 #include <fstream>
@@ -49,10 +32,6 @@ struct Record {
     string    str_val;
 };
 
-// -------------------------------------------------------
-// AVL tree node (one per stored record). Identical to the node
-// used in hash_table_search.cpp so the trees are built the same way.
-// -------------------------------------------------------
 struct AVLNode {
     long long key;       // integer_val
     string    value;     // str_val
@@ -276,22 +255,12 @@ static void searchStep(const HashTable& table, long long target, vector<string>&
     steps.push_back(result.str());
 }
 
-// -------------------------------------------------------
-// Main
-// -------------------------------------------------------
 int main() {
-    // ==============================================================
-    // INPUT CONFIGURATION (comment/uncomment; one active block).
-    //   *dataset_n.csv
-    //   *a found target     (tutor specifies in the code file)
-    //   *a not-found target (tutor specifies in the code file)
-    // ==============================================================
 
     string input_file  = "dataset_1000.csv";
     long long target   = 8138274075LL;   // FOUND  (depth 3 in its bucket)
     // long long target = 123456789LL;    // NOT FOUND (only 9 digits, never in dataset)
 
-    // ==============================================================
 
     vector<Record> data = readCSV(input_file);
     if (data.empty()) {
@@ -309,7 +278,6 @@ int main() {
     vector<string> steps;
     searchStep(table, target, steps);
 
-    // Output filename: dataset_<n>_hash_table_search_step_<target>.txt
     string token   = extractSizeToken(input_file);
     string out_txt = "dataset_" + token + "_hash_table_search_step_"
                    + to_string(target) + ".txt";

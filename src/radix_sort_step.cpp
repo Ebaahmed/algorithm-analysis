@@ -25,18 +25,13 @@
 
 using namespace std;
 
-// -------------------------------------------------------
-// Data record: holds one CSV row
-// -------------------------------------------------------
+
 struct Record {
     long long integer_val;
     string    str_val;
 };
 
-// -------------------------------------------------------
-// Read rows [start_row .. end_row] (1-based) from a CSV.
-// CSV format: <integer>,<string>   (no header row)
-// -------------------------------------------------------
+
 vector<Record> readCSV(const string& filename, int start_row, int end_row) {
     vector<Record> data;
     ifstream fin(filename);
@@ -69,10 +64,7 @@ vector<Record> readCSV(const string& filename, int start_row, int end_row) {
     return data;
 }
 
-// -------------------------------------------------------
-// Write the current state of the array to the output file.
-// format:  [int/str, int/str, ...]  <label>
-// -------------------------------------------------------
+
 void writeState(ofstream& fout, const vector<Record>& arr, const string& label) {
     fout << "[";
     for (size_t i = 0; i < arr.size(); ++i) {
@@ -153,14 +145,9 @@ string buildOutputFilename(const string& csv_filename, int start_row, int end_ro
            to_string(start_row) + "_" + to_string(end_row) + ".txt";
 }
 
-// -------------------------------------------------------
-// Main
-// -------------------------------------------------------
-int main() {
-    // ==============================================================
-    // INPUT CONFIGURATION  (tutor/demo will uncomment the desired line)
-    // ==============================================================
 
+int main() {
+    
     // --- dataset filename ---
     //const string DATASET = "dataset_100.csv";
     const string DATASET = "dataset_1000.csv";
