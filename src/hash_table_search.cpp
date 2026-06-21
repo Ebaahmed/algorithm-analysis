@@ -6,8 +6,8 @@
 // Trimester: 2610
 // Member_1: 242UC243BE | EBA MOHAMED ABBAS AHMED    | +60136734355
 // Member_2: 242UC244SN | MOHAMMAD IEMAN BIN ZAHARI  | +60183756140
-// Member_3: 242UC243B4 | LAMA M. R. SIAM            | +60183942734
-// Member_4: 242UC244L3 | HAREIN A/L SATHIAMURTHY    | +60143653986
+// Member_3: 242UC244L3 | HAREIN A/L SATHIAMURTHY    | +60143653986
+// Member_4: 242UC243B4 | LAMA M. R. SIAM            | +60183942734
 // *********************************************************
 // Task Distribution
 // Member_1: Dataset Generator + Radix Sort
