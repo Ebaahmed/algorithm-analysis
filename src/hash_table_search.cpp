@@ -10,7 +10,7 @@
 // Member_4: 242UC244L3 | HAREIN A/L SATHIAMURTHY    | +60143653986
 // *********************************************************
 // Task Distribution
-// Member_1: Radix Sort
+// Member_1: Dataset Generator + Radix Sort
 // Member_2: Radix Sort Step + Heap Sort
 // Member_3: Hash Table Search + Heap Sort Step
 // Member_4: Hash Table Search Step + Conclusion
