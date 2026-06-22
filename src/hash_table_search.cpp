@@ -8,30 +8,27 @@
 // Member_2: 242UC244SN | MOHAMMAD IEMAN BIN ZAHARI |MOHAMMAD.IEMAN.ZAHARI@student.mmu.edu.my| +60183756140
 // Member_3: 242UC244L3 | HAREIN A/L SATHIAMURTHY  |HAREIN.SATHIAMURTHY@student.mmu.edu.my| +60143653986
 // Member_4: 242UC243B4 | LAMA M. R. SIAM     |LAMA.M.R@student.mmu.edu.my| +60183942734
+
 // *********************************************************
 // Task Distribution
-// Member_1: Dataset Generator
-// Member_2: Radix Sort Step
-// Member_3: Hash Table Search
+// Member_1: Dataset Generator + Radix Sort
+// Member_2: Radix Sort Step + Heap Sort
+// Member_3: Hash Table Search + Heap Sort Step
 // Member_4: Hash Table Search Step + Conclusion
 // *********************************************************
-//
-// DESCRIPTION:
-//   SOURCE file  -> build the hash table (n records)
-//   TARGET file  -> keys to search for (same size n)
-//
-//   For each dataset size n:
-//     - Builds hash table from SOURCE (dataset_n.csv)
-//     - Searches every key from TARGET (dataset_n.csv is both source and target)
-//     - Performs n searches per case (single search too fast to measure)
-//     - Writes hash_table_search_dataset_n.txt:
-//         Best case time: x seconds
-//         Average case time: y seconds
-//         Worst case time: z seconds
-// *********************************************************
+
+// -------------------------------------------------------
+// Hash Table Search with a SEPARATE TARGET FILE.
+//   - The dataset file is loaded into a hash table (AVL-tree buckets).
+//   - A separate, smaller target file supplies the keys to search for.
+//   - Best / Average / Worst case search time is measured, performing
+//     n searches per case (n = dataset size).
+//   - Output: hash_table_search_dataset_<n>.txt
+// -------------------------------------------------------
 
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <vector>
 #include <string>
 #include <climits>
@@ -40,17 +37,11 @@
 using namespace std;
 using namespace chrono;
 
-// -------------------------------------------------------
-// Record: 10-digit integer key + 5-letter string
-// -------------------------------------------------------
 struct Record {
     long long integer_val;
     string    str_val;
 };
 
-// -------------------------------------------------------
-// AVL tree node
-// -------------------------------------------------------
 struct AVLNode {
     long long key;
     string    value;
@@ -61,223 +52,270 @@ struct AVLNode {
         : key(k), value(v), height(1), left(nullptr), right(nullptr) {}
 };
 
-static int ht(AVLNode* n) { return n ? n->height : 0; }
-static void upd(AVLNode* n) { int l=ht(n->left),r=ht(n->right); n->height=1+(l>r?l:r); }
+static int nodeHeight(AVLNode* n) { return n ? n->height : 0; }
+static int balanceFactor(AVLNode* n) { return n ? nodeHeight(n->left) - nodeHeight(n->right) : 0; }
+static void updateHeight(AVLNode* n) {
+    int hl = nodeHeight(n->left), hr = nodeHeight(n->right);
+    n->height = 1 + (hl > hr ? hl : hr);
+}
 
-static AVLNode* rotR(AVLNode* y) {
-    AVLNode* x=y->left; y->left=x->right; x->right=y; upd(y); upd(x); return x;
+static AVLNode* rotateRight(AVLNode* y) {
+    AVLNode* x = y->left;
+    AVLNode* t = x->right;
+    x->right = y;
+    y->left  = t;
+    updateHeight(y);
+    updateHeight(x);
+    return x;
 }
-static AVLNode* rotL(AVLNode* x) {
-    AVLNode* y=x->right; x->right=y->left; y->left=x; upd(x); upd(y); return y;
+
+static AVLNode* rotateLeft(AVLNode* x) {
+    AVLNode* y = x->right;
+    AVLNode* t = y->left;
+    y->left  = x;
+    x->right = t;
+    updateHeight(x);
+    updateHeight(y);
+    return y;
 }
-static AVLNode* ins(AVLNode* n, long long k, const string& v) {
-    if (!n) return new AVLNode(k,v);
-    if (k<n->key) n->left=ins(n->left,k,v);
-    else if (k>n->key) n->right=ins(n->right,k,v);
-    else { n->value=v; return n; }
-    upd(n);
-    int bf=ht(n->left)-ht(n->right);
-    if (bf> 1&&k<n->left->key)  return rotR(n);
-    if (bf<-1&&k>n->right->key) return rotL(n);
-    if (bf> 1&&k>n->left->key)  { n->left=rotL(n->left);  return rotR(n); }
-    if (bf<-1&&k<n->right->key) { n->right=rotR(n->right); return rotL(n); }
-    return n;
+
+static AVLNode* avlInsert(AVLNode* node, long long key, const string& value) {
+    if (!node) return new AVLNode(key, value);
+
+    if (key < node->key)
+        node->left = avlInsert(node->left, key, value);
+    else if (key > node->key)
+        node->right = avlInsert(node->right, key, value);
+    else {
+        node->value = value;
+        return node;
+    }
+
+    updateHeight(node);
+    int bf = balanceFactor(node);
+
+    if (bf > 1 && key < node->left->key)  return rotateRight(node);
+    if (bf < -1 && key > node->right->key) return rotateLeft(node);
+    if (bf > 1 && key > node->left->key)  { node->left = rotateLeft(node->left); return rotateRight(node); }
+    if (bf < -1 && key < node->right->key) { node->right = rotateRight(node->right); return rotateLeft(node); }
+
+    return node;
 }
-static bool srch(AVLNode* n, long long k, string& out) {
-    while(n) {
-        if(k==n->key){out=n->value;return true;}
-        n=(k<n->key)?n->left:n->right;
+
+static bool avlSearch(AVLNode* node, long long key, string& out_value) {
+    while (node) {
+        if      (key == node->key) { out_value = node->value; return true; }
+        else if (key <  node->key) node = node->left;
+        else                       node = node->right;
     }
     return false;
 }
-static int depth(AVLNode* n, long long k) {
-    int d=0;
-    while(n){++d;if(k==n->key)return d;n=(k<n->key)?n->left:n->right;}
+
+static int avlSearchDepth(AVLNode* node, long long key) {
+    int d = 0;
+    while (node) {
+        ++d;
+        if      (key == node->key) return d;
+        else if (key <  node->key) node = node->left;
+        else                       node = node->right;
+    }
     return -1;
 }
-static void destroy(AVLNode* n){if(!n)return;destroy(n->left);destroy(n->right);delete n;}
 
-// -------------------------------------------------------
-// Hash table with AVL chaining
-// -------------------------------------------------------
+static void avlDestroy(AVLNode* n) {
+    if (!n) return;
+    avlDestroy(n->left);
+    avlDestroy(n->right);
+    delete n;
+}
+
 class HashTable {
 public:
-    explicit HashTable(long long sz): size_(sz), buckets_(sz,nullptr){}
-    ~HashTable(){for(auto* b:buckets_)destroy(b);}
-    long long hash(long long k)const{return(k%size_+size_)%size_;}
-    void insert(long long k,const string& v){long long h=hash(k);buckets_[h]=ins(buckets_[h],k,v);}
-    bool search(long long k,string& out)const{return srch(buckets_[hash(k)],k,out);}
-    int searchDepth(long long k)const{return depth(buckets_[hash(k)],k);}
+    explicit HashTable(long long table_size) : size_(table_size), buckets_(table_size, nullptr) {}
+    ~HashTable() { for (auto* b : buckets_) avlDestroy(b); }
+
+    long long hash(long long key) const {
+        return (key % size_ + size_) % size_;
+    }
+    void insert(long long key, const string& value) {
+        long long h = hash(key);
+        buckets_[h] = avlInsert(buckets_[h], key, value);
+    }
+    bool search(long long key, string& out_value) const {
+        return avlSearch(buckets_[hash(key)], key, out_value);
+    }
+    int searchDepth(long long key) const {
+        return avlSearchDepth(buckets_[hash(key)], key);
+    }
+    long long tableSize() const { return size_; }
+
 private:
-    long long size_;
-    vector<AVLNode*> buckets_;
+    long long          size_;
+    vector<AVLNode*>   buckets_;
 };
 
-static bool isPrime(long long x){
-    if(x<2)return false;if(x%2==0)return x==2;
-    for(long long i=3;i*i<=x;i+=2)if(x%i==0)return false;return true;
+static bool isPrime(long long x) {
+    if (x < 2) return false;
+    if (x % 2 == 0) return x == 2;
+    for (long long i = 3; i * i <= x; i += 2)
+        if (x % i == 0) return false;
+    return true;
 }
-static long long nextPrime(long long n){long long c=n<2?2:n;while(!isPrime(c))++c;return c;}
+static long long nextPrime(long long n) {
+    long long c = (n < 2) ? 2 : n;
+    while (!isPrime(c)) ++c;
+    return c;
+}
 
-// -------------------------------------------------------
-// Read CSV (I/O not timed)
-// -------------------------------------------------------
-static vector<Record> readCSV(const string& fn){
-    vector<Record> data; ifstream f(fn);
-    if(!f.is_open()){cerr<<"Cannot open "<<fn<<endl;return data;}
-    string line;
-    while(getline(f,line)){
-        while(!line.empty()&&(line.back()=='\r'||line.back()=='\n'||line.back()==' '))line.pop_back();
-        if(line.empty()||line[0]=='#'||line[0]=='R')continue;
-        size_t c=line.find(',');if(c==string::npos)continue;
-        Record r;
-        try{r.integer_val=stoll(line.substr(0,c));}catch(...){continue;}
-        r.str_val=line.substr(c+1);data.push_back(r);
+static vector<Record> readCSV(const string& filename) {
+    vector<Record> data;
+    ifstream fin(filename);
+    if (!fin.is_open()) {
+        cerr << "Error: cannot open dataset file " << filename << endl;
+        return data;
     }
+    string line;
+    while (getline(fin, line)) {
+        while (!line.empty() &&
+              (line.back() == '\r' || line.back() == '\n' || line.back() == ' '))
+            line.pop_back();
+        if (line.empty()) continue;
+        size_t comma = line.find(',');
+        if (comma == string::npos) continue;
+        Record rec;
+        rec.integer_val = stoll(line.substr(0, comma));
+        rec.str_val     = line.substr(comma + 1);
+        data.push_back(rec);
+    }
+    fin.close();
     return data;
 }
 
-static string sizeToken(const string& fn){
-    string b=fn;
-    size_t s=b.find_last_of("/\\");if(s!=string::npos)b=b.substr(s+1);
-    size_t d=b.rfind('.');if(d!=string::npos)b=b.substr(0,d);
-    size_t u=b.rfind('_');if(u!=string::npos)return b.substr(u+1);
-    return b;
+
+static string extractSizeToken(const string& csv_filename) {
+    string base = csv_filename;
+    size_t slash = base.find_last_of("/\\");
+    if (slash != string::npos) base = base.substr(slash + 1);
+    size_t dot = base.rfind('.');
+    if (dot != string::npos) base = base.substr(0, dot);
+    size_t us = base.rfind('_');
+    if (us != string::npos) return base.substr(us + 1);
+    return base;
 }
 
-// -------------------------------------------------------
-// Process one source+target pair
-// SOURCE: file that fills the hash table
-// TARGET: file whose every key is searched (n searches per case)
-// -------------------------------------------------------
-static void process(const string& sourcePath, const string& targetPath){
-    cout << "\n--- Processing: " << sourcePath << " ---" << endl;
+static void runAndTime(const string& dataset_file, const string& target_file) {
+    cout << "\n--- Processing: " << dataset_file
+         << "  (targets: " << target_file << ") ---" << endl;
 
-    // Read both files (I/O not timed)
-    vector<Record> source = readCSV(sourcePath);
-    vector<Record> target = readCSV(targetPath);
+    vector<Record> data = readCSV(dataset_file);
+    if (data.empty()) { cerr << "  No dataset read. Skipping." << endl; return; }
 
-    if(source.empty()||target.empty()){cerr<<"  Empty file. Skipping.\n";return;}
+    // Read the target file as full records (integer + string), then
+    // derive the list of keys to search. Reading as records lets us
+    // later write the (integer, string) rows to the output file.
+    vector<Record> targets_records = readCSV(target_file);
+    if (targets_records.empty()) { cerr << "  No targets read. Skipping." << endl; return; }
 
-    long long n = (long long)source.size(); // n = dataset size = number of searches
-    long long m = (long long)target.size();
+    vector<long long> targets;
+    targets.reserve(targets_records.size());
+    for (const auto& r : targets_records) targets.push_back(r.integer_val);
 
-    cout << "  Source size: " << n << "  |  Target size: " << m << endl;
+    long long n = (long long)data.size();
+    cout << "  Dataset size: " << n << ",  targets: " << targets.size() << endl;
 
-    // Build hash table from SOURCE (not timed)
-    HashTable table(nextPrime(n));
-    for(const auto& r : source)
+    long long table_size = nextPrime(n);
+    HashTable table(table_size);
+    for (const auto& r : data)
         table.insert(r.integer_val, r.str_val);
 
-    // Classify target keys by AVL depth -> best and worst case pools
-    int minD=INT_MAX, maxD=0;
-    for(const auto& r : target){
-        int d=table.searchDepth(r.integer_val);
-        if(d==-1)d=maxD;
-        if(d<minD)minD=d;
-        if(d>maxD)maxD=d;
+    int min_depth = INT_MAX, max_depth = -1;
+    long long best_key = targets[0], worst_key = targets[0];
+    bool any_found = false;
+    for (long long t : targets) {
+        int d = table.searchDepth(t);
+        if (d < 0) continue;
+        any_found = true;
+        if (d < min_depth) { min_depth = d; best_key = t; }
+        if (d > max_depth) { max_depth = d; worst_key = t; }
     }
-    if(minD==INT_MAX)minD=1;
+    if (!any_found) { best_key = worst_key = targets[0]; min_depth = max_depth = -1; }
 
-    vector<Record> bestPool, worstPool;
-    for(const auto& r : target){
-        int d=table.searchDepth(r.integer_val);
-        if(d==-1)d=maxD;
-        if(d==minD)bestPool.push_back(r);
-        if(d==maxD)worstPool.push_back(r);
-    }
-    if(bestPool.empty())  bestPool.push_back(target[0]);
-    if(worstPool.empty()) worstPool.push_back(target[m-1]);
+    string sink;
+    volatile bool guard = false;
 
-    size_t bsz=bestPool.size(), wsz=worstPool.size();
-    string val;
-    volatile bool guard=false;
+    auto b0 = high_resolution_clock::now();
+    for (long long i = 0; i < n; ++i) guard ^= table.search(best_key, sink);
+    auto b1 = high_resolution_clock::now();
+    double best_time = duration<double>(b1 - b0).count() / (double)n;
 
-    // ----------------------------------------------------------
-    // BEST CASE: n searches on shallowest keys (depth = minD)
-    // ----------------------------------------------------------
-    auto b0=high_resolution_clock::now();
-    for(long long i=0;i<n;++i)
-        guard^=table.search(bestPool[i%bsz].integer_val, val);
-    auto b1=high_resolution_clock::now();
-    double bestTime=duration<double>(b1-b0).count()/(double)n;
+    size_t tsz = targets.size();
+    auto a0 = high_resolution_clock::now();
+    for (long long i = 0; i < n; ++i) guard ^= table.search(targets[i % tsz], sink);
+    auto a1 = high_resolution_clock::now();
+    double avg_time = duration<double>(a1 - a0).count() / (double)n;
 
-    // ----------------------------------------------------------
-    // AVERAGE CASE: n searches cycling through ALL target keys
-    // ----------------------------------------------------------
-    auto a0=high_resolution_clock::now();
-    for(long long i=0;i<n;++i)
-        guard^=table.search(target[i%m].integer_val, val);
-    auto a1=high_resolution_clock::now();
-    double avgTime=duration<double>(a1-a0).count()/(double)n;
-
-    // ----------------------------------------------------------
-    // WORST CASE: n searches on deepest keys (depth = maxD)
-    // ----------------------------------------------------------
-    auto w0=high_resolution_clock::now();
-    for(long long i=0;i<n;++i)
-        guard^=table.search(worstPool[i%wsz].integer_val, val);
-    auto w1=high_resolution_clock::now();
-    double worstTime=duration<double>(w1-w0).count()/(double)n;
+    auto w0 = high_resolution_clock::now();
+    for (long long i = 0; i < n; ++i) guard ^= table.search(worst_key, sink);
+    auto w1 = high_resolution_clock::now();
+    double worst_time = duration<double>(w1 - w0).count() / (double)n;
 
     (void)guard;
 
-    // Print to console
     cout.setf(ios::scientific);
-    cout << "  Best case time:    " << bestTime  << " seconds (depth " << minD << ")" << endl;
-    cout << "  Average case time: " << avgTime   << " seconds" << endl;
-    cout << "  Worst case time:   " << worstTime << " seconds (depth " << maxD << ")" << endl;
+    cout << "  Best case time:    " << best_time  << " seconds (depth " << min_depth << ")" << endl;
+    cout << "  Average case time: " << avg_time   << " seconds" << endl;
+    cout << "  Worst case time:   " << worst_time << " seconds (depth " << max_depth << ")" << endl;
 
-    // Write output file: hash_table_search_dataset_n.txt
-    // Lists ALL n search results then timing at the bottom
-    string outFile = "hash_table_search_dataset_" + sizeToken(sourcePath) + ".txt";
-    ofstream fout(outFile);
-    if(fout.is_open()){
-        fout.setf(ios::scientific);
-
-        // Write all n search results (searching every element in target)
-        for(long long i = 0; i < n; ++i){
-            const Record& r = target[i % m];
-            long long idx = table.hash(r.integer_val);
-            bool found = table.search(r.integer_val, val);
-            fout << r.integer_val << "," << (found ? "yes" : "no") << "," << idx << "\n";
+    string token   = extractSizeToken(dataset_file);
+    string out_txt = "hash_table_search_dataset_" + token + ".txt";
+    ofstream fout(out_txt);
+    if (fout.is_open()) {
+        // --- (integer, string) rows of every searched record ---
+        // Each target key is searched in the hash table; the found
+        // record's integer and string fields are written, with a
+        // found / not-found marker.
+        string v;
+        for (const auto& r : targets_records) {
+            bool found = table.search(r.integer_val, v);
+            if (found)
+                fout << r.integer_val << "," << v << ",found\n";
+            else
+                fout << r.integer_val << ",-,not found\n";
         }
 
-        // Timing at the bottom
-        fout << "Best case time: "    << bestTime  << " seconds\n";
-        fout << "Average case time: " << avgTime   << " seconds\n";
-        fout << "Worst case time: "   << worstTime << " seconds\n";
+        // --- running times of the three cases ---
+        fout.setf(ios::scientific);
+        fout << "Best case time: "    << best_time  << " seconds\n";
+        fout << "Average case time: " << avg_time   << " seconds\n";
+        fout << "Worst case time: "   << worst_time << " seconds\n";
         fout.close();
-        cout << "  Written: " << outFile << endl;
+        cout << "  Written: " << out_txt << endl;
     }
 }
 
-// -------------------------------------------------------
-// main
-// SOURCE = dataset_n.csv  (hash table is built from this)
-// TARGET = dataset_n.csv  (every key in this file is searched)
-// Both are the same file — every element searches itself,
-// giving n searches where n = dataset size, as required.
-// -------------------------------------------------------
-int main(){
-    // SOURCE and TARGET are the same file for each size.
-    // The hash table is built from source, then all n target
-    // keys are searched -> n searches per case, per the spec.
-    vector<string> datasets = {
-        "dataset_1000.csv",
-        "dataset_5000.csv",
-        "dataset_10000.csv",
-        "dataset_50000.csv",
-        "dataset_100000.csv",
-        "dataset_250000.csv",
-        "dataset_500000.csv",
-        "dataset_750000.csv",
-        "dataset_1000000.csv",
-        "dataset_2000000.csv"
-    };
+int main(int argc, char* argv[]) {
+    vector<pair<string,string>> jobs;
 
-    for(const auto& ds : datasets)
-        process(ds, ds);  // source and target = same file -> n searches
+    if (argc >= 3) {
+        for (int i = 1; i + 1 < argc; i += 2)
+            jobs.push_back({argv[i], argv[i + 1]});
+    } else {
+        jobs = {
+            {"dataset_1000.csv",    "dataset_100.csv"},
+            {"dataset_5000.csv",    "dataset_1000.csv"},
+            {"dataset_10000.csv",   "dataset_5000.csv"},
+            {"dataset_50000.csv",   "dataset_10000.csv"},
+            {"dataset_100000.csv",  "dataset_50000.csv"},
+            {"dataset_250000.csv",  "dataset_100000.csv"},
+            {"dataset_500000.csv",  "dataset_250000.csv"},
+            {"dataset_750000.csv",  "dataset_500000.csv"},
+            {"dataset_1000000.csv", "dataset_750000.csv"},
+            {"dataset_2000000.csv", "dataset_1000000.csv"}
+        };
+    }
+
+    for (const auto& job : jobs)
+        runAndTime(job.first, job.second);
 
     cout << "\nDone." << endl;
     return 0;
