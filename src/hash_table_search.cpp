@@ -270,20 +270,6 @@ static void runAndTime(const string& dataset_file, const string& target_file) {
     string out_txt = "hash_table_search_dataset_" + token + ".txt";
     ofstream fout(out_txt);
     if (fout.is_open()) {
-        // --- (integer, string) rows of every searched record ---
-        // Each target key is searched in the hash table; the found
-        // record's integer and string fields are written, with a
-        // found / not-found marker.
-        string v;
-        for (const auto& r : targets_records) {
-            bool found = table.search(r.integer_val, v);
-            if (found)
-                fout << r.integer_val << "," << v << ",found\n";
-            else
-                fout << r.integer_val << ",-,not found\n";
-        }
-
-        // --- running times of the three cases ---
         fout.setf(ios::scientific);
         fout << "Best case time: "    << best_time  << " seconds\n";
         fout << "Average case time: " << avg_time   << " seconds\n";
